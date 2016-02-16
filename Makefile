@@ -1,13 +1,14 @@
-
 CC = g++
-CFLAGS = -c -Wall
+CFLAGS = -O3 -Wall
 
-all: sraid
+.PHONY: clean
 
-clean: 
-	rm -rf o.* *.o
+sraid: soft-raid.o
+	${CC} $< -o $@
 
-sraid: soft-raid.cc
-	g++ -o o.sraid $<
+%.o: %.cc
+	${CC} $< ${CFLAGS} -c
 
-
+clean:
+	rm -f sraid
+	rm -f *.o
