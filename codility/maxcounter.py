@@ -6,36 +6,30 @@ def get_max(A):
         mm = max(x, mm)
     return mm
 
-def count(A, N):
-    #print A
-    C = [0] * N
-    for n in A:
-        C[n - 1] += 1
-    #print C
+max_count = 0
+
+def count(num, C):
+    global max_count
+    if C[num - 1] + 1 > max_count:
+        max_count = C[num - 1] + 1
+    C[num - 1] += 1
     return C
 
 def solution(N, A):
+    global max_count
+    max_count = 0
     LA = len(A)
-    #print A
     mc = [0] * N
-    B = []
+    seq_cnt = 0
     for i in xrange(LA):
         if A[i] <= N:
-            B.append(A[i])
+            mc = count(A[i], mc)
+            seq_cnt += 1
         elif A[i] == N + 1:
-            if len(B) > 0:
-                C = count(B, N)
-                for j in xrange(N):
-                    mc[j] += C[j]
-                mm = get_max(mc)
-                mc = [mm] * N
-                B = []
+            if seq_cnt > 0:
+                mc = [max_count] * N
+                seq_cnt = 0
                 #print mc
-    if len(B) > 0:
-        C = count(B, N)
-        for j in xrange(N):
-            mc[j] += C[j]
-        #print mc
     return mc
 
 def solution_slow(N, A):
