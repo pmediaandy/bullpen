@@ -57,4 +57,5 @@ def solution_slow(A):
 if __name__ == '__main__':
     print solution([4 , 2 , 2 , 3 , 2 , 4 , 2 , 2 , 6 , 4]) == -1
     print solution([1, 1, 1, 50, 1]) == 1
+    print solution([1]) == 1
 
