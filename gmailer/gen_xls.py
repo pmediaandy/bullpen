@@ -5,6 +5,13 @@ import xlwt
 import csv
 import os
 
+def is_number(text):
+    d = [ '-', '+', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' ]
+    for c in text:
+        if c not in d:
+            return False
+    return True
+
 def write_xls(outname, sheets):
     book = xlwt.Workbook(encoding="utf-8")
     for sh_name in sorted(sheets):
@@ -13,7 +20,10 @@ def write_xls(outname, sheets):
             row = sheets[sh_name][i]
             for j in range(len(row)):
                 cell = row[j]
-                st.write(i, j, cell)
+                if is_number(cell):
+                    st.write(i, j, float(cell))
+                else:
+                    st.write(i, j, cell)
     book.save(outname)
 
 def read_csv(fname, has_header = True):
