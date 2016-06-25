@@ -1,0 +1,74 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
+
+import smtplib
+import argparse
+import os
+import sys
+
+def send_email(user, pwd, recipient, subject, body, use_ssl = True):
+    gmail_user = user
+    gmail_pwd = pwd
+    FROM = user
+    TO = recipient if type(recipient) is list else [recipient]
+    SUBJECT = subject
+    TEXT = body
+
+    message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
+    """ % (FROM, ", ".join(TO), SUBJECT, TEXT)
+    try:
+        if use_ssl:
+            server_ssl = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+            server_ssl.login(gmail_user, gmail_pwd)  
+            server_ssl.sendmail(FROM, TO, message)
+            server_ssl.close()
+        else:
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.ehlo()
+            server.starttls()
+            server.login(gmail_user, gmail_pwd)
+            server.sendmail(FROM, TO, message)
+            server.close()
+    except Exception as e:
+        print e
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description = 'command line tool to send email via gmail')
+    parser.add_argument('body_file', metavar = 'BODY_FILE', nargs = '?', action = 'store', default = None, help = 'the file to open and send out, \'-\' to read from stdin')
+    parser.add_argument('--to', '-t', dest = 'recipient', nargs = '+', action = 'store', default = None, help = 'the recipient to receive email')
+    parser.add_argument('--subject', '-s', dest = 'subject', nargs = '?', action = 'store', default = None, help = 'email subject')
+    parser.add_argument('--body', '-b', dest = 'body', nargs = '?', action = 'store', default = None, help = 'the message body to send out')
+    parser.add_argument('--attach', '-a', dest = 'attach', nargs = '*', action = 'store', default = None, help = 'files to be attached')
+    parser.add_argument('--user', '-u', dest = 'user', nargs = '?', action = 'store', default = None, help = 'gmail user to send email, default read from environment variable GMAILER_USER')
+    parser.add_argument('--password', '-p', dest = 'password', nargs = '?', action = 'store', default = None, help = 'gmail user password to authenticate, default read from environment variable GMAILER_PASS')
+
+    args = parser.parse_args()
+
+    if args.user is None:
+        try:
+            args.user = os.environ['GMAILER_USER']
+        except KeyError:
+            print 'gmail user not specified or GMAILER_USER is not set'
+            exit(1)
+    if args.password is None:
+        try:
+            args.password = os.environ['GMAILER_PASS']
+        except KeyError:
+            print 'gmail user not specified or GMAILER_PASS is not set'
+            exit(1)
+
+    if args.recipient is None or args.subject is None:
+        parser.print_help()
+    else:
+        if args.body_file is not None:
+            if args.body_file == '-':
+                args.body = ''.join(sys.stdin.readlines())
+            else:
+                with open(args.body_file, 'r') as f:
+                    args.body = f.read()
+        elif args.body is None:
+            print 'message body not speficied'
+            exit(1)
+
+        send_email(args.user, args.password, args.recipient, args.subject, args.body)
