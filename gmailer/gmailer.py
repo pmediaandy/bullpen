@@ -6,31 +6,43 @@ import argparse
 import os
 import sys
 
-def send_email(user, pwd, recipient, subject, body, use_ssl = True):
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
+
+def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True):
     gmail_user = user
     gmail_pwd = pwd
-    FROM = user
-    TO = recipient if type(recipient) is list else [recipient]
-    SUBJECT = subject
-    TEXT = body
 
-    message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
-    """ % (FROM, ", ".join(TO), SUBJECT, TEXT)
+    msg = MIMEMultipart()
+    msg['From'] = user
+    msg['To'] = COMMASPACE.join(recipient)
+    msg['Date'] = formatdate(localtime = True)
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body))
+
+    for fname in attaches or []:
+        with open(fname, "rb") as f:
+            part = MIMEApplication(f.read(), Name = os.path.basename(fname))
+            part['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(fname)
+            msg.attach(part)
+
     try:
         if use_ssl:
             server_ssl = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-            server_ssl.login(gmail_user, gmail_pwd)  
-            server_ssl.sendmail(FROM, TO, message)
+            server_ssl.login(gmail_user, gmail_pwd)
+            server_ssl.sendmail(user, recipient, msg.as_string())
             server_ssl.close()
         else:
             server = smtplib.SMTP("smtp.gmail.com", 587)
             server.ehlo()
             server.starttls()
             server.login(gmail_user, gmail_pwd)
-            server.sendmail(FROM, TO, message)
+            server.sendmail(user, recipient, msg.as_string())
             server.close()
     except Exception as e:
-        print e
+        sys.stderr.write('error: %s\n' % (str(e)))
 
 if __name__ == '__main__':
 
@@ -71,4 +83,4 @@ if __name__ == '__main__':
             print 'message body not speficied'
             exit(1)
 
-        send_email(args.user, args.password, args.recipient, args.subject, args.body)
+        send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach)
