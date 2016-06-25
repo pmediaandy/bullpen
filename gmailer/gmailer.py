@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 
-def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True):
+def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True, use_html = False):
     gmail_user = user
     gmail_pwd = pwd
 
@@ -20,7 +20,11 @@ def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True):
     msg['To'] = COMMASPACE.join(recipient)
     msg['Date'] = formatdate(localtime = True)
     msg['Subject'] = subject
-    msg.attach(MIMEText(body))
+
+    if use_html:
+        msg.attach(MIMEText(body, 'html'))
+    else:
+        msg.attach(MIMEText(body, 'plain'))
 
     for fname in attaches or []:
         with open(fname, "rb") as f:
@@ -51,9 +55,11 @@ if __name__ == '__main__':
     parser.add_argument('--to', '-t', dest = 'recipient', nargs = '+', action = 'store', default = None, help = 'the recipient to receive email')
     parser.add_argument('--subject', '-s', dest = 'subject', nargs = '?', action = 'store', default = None, help = 'email subject')
     parser.add_argument('--body', '-b', dest = 'body', nargs = '?', action = 'store', default = None, help = 'the message body to send out')
+    parser.add_argument('--html', '-m', dest = 'use_html', action = 'store_const', const = True, default = False, help = 'send message body as html')
     parser.add_argument('--attach', '-a', dest = 'attach', nargs = '*', action = 'store', default = None, help = 'files to be attached')
     parser.add_argument('--user', '-u', dest = 'user', nargs = '?', action = 'store', default = None, help = 'gmail user to send email, default read from environment variable GMAILER_USER')
     parser.add_argument('--password', '-p', dest = 'password', nargs = '?', action = 'store', default = None, help = 'gmail user password to authenticate, default read from environment variable GMAILER_PASS')
+    parser.add_argument('--ssl', '-l', dest = 'use_ssl', action = 'store_const', const = True, default = False, help = 'send email via SSL')
 
     args = parser.parse_args()
 
@@ -83,4 +89,4 @@ if __name__ == '__main__':
             print 'message body not speficied'
             exit(1)
 
-        send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach)
+        send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach, use_ssl = args.use_ssl, use_html = args.use_html)
