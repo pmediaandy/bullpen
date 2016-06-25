@@ -16,9 +16,9 @@ def write_xls(outname, sheets):
                 st.write(i, j, cell)
     book.save(outname)
 
-def read_csv(fname, has_header = True, encoding = 'iso-8859-1'):
+def read_csv(fname, has_header = True):
     all = []
-    with open(fname, 'r', encoding = encoding) as fin:
+    with open(fname, 'r') as fin:
         cnt = 0
         reader = csv.reader(fin, delimiter=',', quotechar='"')
         for row in reader:
