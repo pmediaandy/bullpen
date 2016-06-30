@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import smtplib
@@ -70,13 +70,13 @@ if __name__ == '__main__':
         try:
             args.user = os.environ['GMAILER_USER']
         except KeyError:
-            print 'gmail user not specified or GMAILER_USER is not set'
+            print('gmail user not specified or GMAILER_USER is not set')
             exit(1)
     if args.password is None:
         try:
             args.password = os.environ['GMAILER_PASS']
         except KeyError:
-            print 'gmail user not specified or GMAILER_PASS is not set'
+            print('gmail user not specified or GMAILER_PASS is not set')
             exit(1)
 
     if args.recipient is None or args.subject is None:
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                 with open(args.body_file, 'r') as f:
                     args.body = f.read()
         elif args.body is None:
-            print 'message body not speficied'
+            print('message body not speficied')
             exit(1)
 
         send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach, reply_to = args.reply_to, use_ssl = args.use_ssl, use_html = args.use_html)
