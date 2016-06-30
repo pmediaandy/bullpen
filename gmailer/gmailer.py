@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 
-def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True, use_html = False):
+def send_email(user, pwd, recipient, subject, body, attaches, reply_to = None, use_ssl = True, use_html = False):
     gmail_user = user
     gmail_pwd = pwd
 
@@ -20,6 +20,8 @@ def send_email(user, pwd, recipient, subject, body, attaches, use_ssl = True, us
     msg['To'] = COMMASPACE.join(recipient)
     msg['Date'] = formatdate(localtime = True)
     msg['Subject'] = subject
+    if reply_to is not None:
+        msg['Reply-to'] = reply_to
 
     if use_html:
         msg.attach(MIMEText(body, 'html'))
@@ -53,6 +55,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'command line tool to send email via gmail')
     parser.add_argument('body_file', metavar = 'BODY_FILE', nargs = '?', action = 'store', default = None, help = 'the file to open and send out, \'-\' to read from stdin')
     parser.add_argument('--to', '-t', dest = 'recipient', nargs = '+', action = 'store', default = None, help = 'the recipient to receive email')
+    parser.add_argument('--reply-to', '-r', dest = 'reply_to', nargs = '?', action = 'store', default = None, help = 'default reply email address')
     parser.add_argument('--subject', '-s', dest = 'subject', nargs = '?', action = 'store', default = None, help = 'email subject')
     parser.add_argument('--body', '-b', dest = 'body', nargs = '?', action = 'store', default = None, help = 'the message body to send out')
     parser.add_argument('--html', '-m', dest = 'use_html', action = 'store_const', const = True, default = False, help = 'send message body as html')
@@ -89,4 +92,4 @@ if __name__ == '__main__':
             print 'message body not speficied'
             exit(1)
 
-        send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach, use_ssl = args.use_ssl, use_html = args.use_html)
+        send_email(args.user, args.password, args.recipient, args.subject, args.body, args.attach, reply_to = args.reply_to, use_ssl = args.use_ssl, use_html = args.use_html)
