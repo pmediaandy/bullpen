@@ -1,32 +1,47 @@
 #!/usr/bin/env python
 
-import numpy as np
+import random
 
-def merge_sort(a, v):
-    l = 0
-    r = len(a)-1
-    while l <= r:
-        m = (l+r)//2
-        if a[m] > v:
-            r = m-1
-        elif a[m] < v:
-            l = m+1
-        else:
-            l=m
+def merge(left, right):
+    res = []
+    while True:
+        if len(left) == 0:
+            res += right
             break
-    if l >= len(a):
-        a.append(v)
+        elif len(right) == 0:
+            res += left
+            break
+        elif left[0] > right[0]:
+            res += [ right.pop(0) ]
+        else:
+            res += [ left.pop(0) ]
+        if len(left) == 0 and len(right) == 0:
+            break
+    #print(res)
+    return res
+    
+def merge_sort(a):
+    N = len(a)
+    if N == 1:
+        return a
     else:
-        a.insert(l,v)
+        m = N//2
+        left = a[0:m]
+        right = a[m:]
+        #print('%s %s' % (left, right))
+        left = merge_sort(left)
+        right = merge_sort(right)
+        return merge(left, right)
 
-a = np.random.rand(1,100)
-b = []
-for x in a[0]:
-    merge_sort(b, x)
+N = 100
+a = []
+for i in range(N):
+    a.append(random.randint(0, 10000))
+b = merge_sort(a)
 
 s = True
-c = sorted(b)
-for i in range(len(b)):
+c = sorted(a)
+for i in range(len(a)):
     if b[i] != c[i]:
         s = False
 print(s)
